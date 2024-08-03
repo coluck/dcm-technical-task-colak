@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from django.conf import settings
 from django.test import TestCase
 
 from api.models import TestFilePath, TestEnvironment
@@ -13,7 +14,11 @@ class TestGetAssets(TestCase):
 
     def test_empty_models(self):
         self.assertEqual(
-            {'available_paths': [], 'test_envs': []},
+            {
+                'available_paths': [],
+                'test_envs': [],
+                'upload_dirs': settings.TEST_DIRS_WITHOUT_BASE_DIR,
+            },
             get_assets()
         )
 
