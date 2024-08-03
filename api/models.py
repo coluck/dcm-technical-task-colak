@@ -39,13 +39,13 @@ class TestEnvironment(Timestampable):
         if self.is_busy():
             raise RuntimeError(f'Trying to lock a busy env(id: {self.id})')
         self.status = TestEnvironment.StatusChoices.BUSY.name
-        self.save()
+        self.save(update_fields=['status'])
 
     def unlock(self):
         if self.is_idle():
             raise RuntimeError(f'Trying to unlock an idle env(id: {self.id})')
         self.status = TestEnvironment.StatusChoices.IDLE.name
-        self.save()
+        self.save(update_fields=['status'])
 
 
 class TestRunRequest(Timestampable):
@@ -68,28 +68,27 @@ class TestRunRequest(Timestampable):
 
     def mark_as_running(self):
         self.status = TestRunRequest.StatusChoices.RUNNING.name
-        self.save()
+        self.save(update_fields=['status'])
+
 
     def mark_as_success(self):
         self.status = TestRunRequest.StatusChoices.SUCCESS.name
-        self.save()
+        self.save(update_fields=['status'])
 
     def mark_as_failed(self):
         self.status = TestRunRequest.StatusChoices.FAILED.name
-        self.save()
+        self.save(update_fields=['status'])
 
     def mark_as_retrying(self):
         self.status = TestRunRequest.StatusChoices.RETRYING.name
-        self.save()
+        self.save(update_fields=['status'])
 
     def mark_as_failed_to_start(self):
         self.status = TestRunRequest.StatusChoices.FAILED_TO_START.name
-        self.save()
+        self.save(update_fields=['status'])
 
     def save_logs(self, logs=None):
         if not logs:
             return
         self.logs += '\n' + logs
-        self.save()
-
-
+        self.save(update_fields=['logs'])
