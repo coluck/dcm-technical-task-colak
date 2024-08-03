@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -100,7 +101,7 @@ class TestTestRunRequestAPIView(TestCase):
         self.assertEqual(1, TestRunRequest.objects.filter(requested_by='iron man', env_id=self.env.id).count())
 
 
-class TestRunRequestItemAPIView(TestCase):
+class TestTestRunRequestItemAPIView(TestCase):
 
     def setUp(self) -> None:
         self.env = TestEnvironment.objects.create(name='my_env')
@@ -152,3 +153,25 @@ class TestAssetsAPIView(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual({'k': 'v'}, response.json())
+
+class TestTestFilePathCreateAPIView(TestCase):
+    
+    def test_post_valid_test_file_path(self):
+        response = self.client.post('/api/v1/test_file', data={
+            'test_file': SimpleUploadedFile(
+                'my_uploaded_test.py',
+                b'''
+                    from django.test import TestCase
+                    class TestSuccess(TestCase):
+                        def test_1(self):
+                            pass
+                ''',
+            ),
+            'upload_dir': '/sample-tests',
+        })
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        response_data = response.json()
+        self.assertIn('id', response_data)
+        self.assertIn('path', response_data)
+        self.assertEqual('/sample-tests/my_uploaded_test.py', response_data['path'])
+        self.assertEqual(1, TestFilePath.objects.filter(path='/sample-tests/my_uploaded_test.py').count())
