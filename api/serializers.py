@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 
 from api.models import TestRunRequest, TestFilePath, TestEnvironment
@@ -56,7 +57,14 @@ class TestFilePathCreateSerializer(TestFilePathSerializer):
     test_file = serializers.FileField(write_only=True, required=True)
 
     def validate(self, data):
+        upload_dir = data.get('upload_dir')
         test_file = data.get('test_file')
+
+        valid_dirs = settings.TEST_DIRS_WITHOUT_BASE_DIR
+        if upload_dir not in valid_dirs:
+            raise serializers.ValidationError(
+                f'upload_dir should be one of the valid directories: {valid_dirs}'
+            )
 
         if not test_file.name.endswith('.py'):
             raise serializers.ValidationError('test_file must be a python file!')
