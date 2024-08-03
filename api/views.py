@@ -15,7 +15,13 @@ from api.usecases import get_assets, upload_test_file_path
 
 class TestRunRequestAPIView(ListCreateAPIView):
     serializer_class = TestRunRequestSerializer
-    queryset = TestRunRequest.objects.all().order_by('-created_at')
+    queryset = TestRunRequest.objects.select_related(
+        'env'
+    ).prefetch_related(
+        'path'
+    ).order_by(
+        '-created_at'
+    )
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -24,7 +30,7 @@ class TestRunRequestAPIView(ListCreateAPIView):
 
 class TestRunRequestItemAPIView(RetrieveAPIView):
     serializer_class = TestRunRequestItemSerializer
-    queryset = TestRunRequest.objects.all()
+    queryset = TestRunRequest.objects.select_related('env').prefetch_related('path')
     lookup_field = 'pk'
 
 
