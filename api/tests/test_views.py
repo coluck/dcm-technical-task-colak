@@ -155,9 +155,13 @@ class TestAssetsAPIView(TestCase):
         self.assertEqual({'k': 'v'}, response.json())
 
 class TestTestFilePathCreateAPIView(TestCase):
+
+
+    def setUp(self):
+        self.url = reverse('test_file')
     
     def test_post_valid_test_file_path(self):
-        response = self.client.post('/api/v1/test_file', data={
+        response = self.client.post(self.url, data={
             'test_file': SimpleUploadedFile(
                 'my_uploaded_test.py',
                 b'''
