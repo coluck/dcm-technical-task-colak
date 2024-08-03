@@ -1,7 +1,3 @@
-from django.conf import settings
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-
 from rest_framework import status, parsers
 from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
@@ -14,7 +10,7 @@ from api.serializers import (
   TestFilePathCreateSerializer
 )
 from api.tasks import execute_test_run_request
-from api.usecases import get_assets
+from api.usecases import get_assets, upload_test_file_path
 
 
 class TestRunRequestAPIView(ListCreateAPIView):
@@ -39,12 +35,7 @@ class TestFilePathCreateAPIView(CreateAPIView):
     
 
     def perform_create(self, serializer):
-        upload_dir = serializer.validated_data.pop('upload_dir')
-        test_file_object = serializer.validated_data.pop('test_file')
-        
-        path = f'{upload_dir}/{test_file_object.name}'
-
-        default_storage.save(f'{settings.BASE_DIR}{path}', ContentFile(test_file_object.read()))
+        path: str = upload_test_file_path(serializer)
         serializer.validated_data['path'] = path
         serializer.save()
 
