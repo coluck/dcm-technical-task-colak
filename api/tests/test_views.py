@@ -159,17 +159,72 @@ class TestTestFilePathCreateAPIView(TestCase):
 
     def setUp(self):
         self.url = reverse('test_file')
+        self.valid_test_file_content = b'''
+            from django.test import TestCase
+            class TestSuccess(TestCase):
+                def test_1(self):
+                    pass
+        '''
+
+    def test_post_no_data(self):
+        response = self.client.post(self.url, data={})
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        response_data = response.json()
+        self.assertEqual(
+            {
+                'test_file': ['No file was submitted.'],
+                'upload_dir': ['This field is required.'],
+            },
+            response_data
+        )
     
+    def test_post_invalid_test_file_and_upload_dir(self):
+        response = self.client.post(self.url, data={
+            'test_file': 'a string more than a file',
+            'upload_dir': 42,
+        })
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        response_data = response.json()
+        self.assertEqual({
+            'test_file': ['The submitted data was not a file. Check the encoding type on the form.']
+        }, response_data)
+
+    def test_post_invalid_upload_dir(self):
+        response = self.client.post(self.url, data={
+            'test_file': SimpleUploadedFile(
+                'test_file.py',
+                self.valid_test_file_content,
+            ),
+            'upload_dir': '/invalid-dir',
+        })
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        response_data = response.json()
+        self.assertIn('non_field_errors', response_data)
+        self.assertIn(
+            'upload_dir should be one of the valid directories: ',
+            response_data['non_field_errors'][0]
+        )
+    
+    def test_post_invalid_test_file_extension(self):
+        response = self.client.post(self.url, data={
+            'test_file': SimpleUploadedFile(
+                'my_invalid_extension_uploaded_test.txt',
+                self.valid_test_file_content,
+            ),
+            'upload_dir': '/sample-tests',
+        })
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+        response_data = response.json()
+        self.assertIn('non_field_errors', response_data)
+        self.assertIn('test_file must be a python file!', response_data['non_field_errors'][0])
+
+
+
     def test_post_valid_test_file_path(self):
         response = self.client.post(self.url, data={
             'test_file': SimpleUploadedFile(
                 'my_uploaded_test.py',
-                b'''
-                    from django.test import TestCase
-                    class TestSuccess(TestCase):
-                        def test_1(self):
-                            pass
-                ''',
+                self.valid_test_file_content
             ),
             'upload_dir': '/sample-tests',
         })
