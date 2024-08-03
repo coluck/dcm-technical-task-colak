@@ -49,6 +49,27 @@ class TestFilePathSerializer(serializers.ModelSerializer):
         fields = ('id', 'path')
 
 
+
+class TestFilePathCreateSerializer(TestFilePathSerializer):
+    """ Extended TestFilePathSerializer for creating a new TestFilePath instance """
+    upload_dir = serializers.CharField(write_only=True, required=True)
+    test_file = serializers.FileField(write_only=True, required=True)
+
+    def validate(self, data):
+        test_file = data.get('test_file')
+
+        if not test_file.name.endswith('.py'):
+            raise serializers.ValidationError('test_file must be a python file!')
+
+        return data
+    
+    class Meta(TestFilePathSerializer.Meta):
+        fields = TestFilePathSerializer.Meta.fields + ('upload_dir', 'test_file')
+        read_only_fields = (
+            'id',
+            'path'
+        )
+
 class TestEnvironmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestEnvironment
