@@ -1,3 +1,39 @@
+# Hello
+
+Hello, thank you for the case study. This task was enjoyable. See you.
+
+### Done's
+
+a370a22 Fix netcat installation for python:3.10 Docker image
+41a9e12 Add happy-path test for the Acceptance Criteria before implementing it
+8a866d0 Add TestFilePathCreateSerializer to validate POST body
+94e14a8 Add  endpoint and TestFilePathCreateAPIView to pass happy-path testing for the AC
+dbeb4b0 Export  from  endpoint to adapt FE Upload dir select component
+649a642 Refactor: Put file upload biz. logic to the  file.
+3dc14e5 Update tests for recent changes in usecases.py
+ef4d9e0 Add more test cases :(unhappy-path):
+d65b4ee Add validation to pass unhappy path test
+aa63f38 Fix N+1 problems in TestRunRequestAPIView and TestRunRequestItemAPIView with select_related and prefetch_related
+268b3d7 Add update_fields argument on each .save() call to prevent all of the model fields from being updated in the database.
+641af65 (HEAD -> oguz/ionos-case-study) Bugfix: Fix the possible race condition by using select_for_update in a transaction block
+
+### Todo's
+#### FE: 
+- In the FE, I detected an issue. When the user upload a test file, the new `TestFilePath` will not be shown in New request section(last input).
+User have to hard refresh their browser tab, to see the recently uploaded file in the select dropdown.
+What could be done:
+In `IONOSTestExecutor` component, `/asset` endpoint called just one time in `componentDidMount`.
+After uploading the file(in the Upload test secion), we can request `/asset` enpoint. 
+
+#### BE:
+
+- In `TestTestFilePathCreateAPIView.test_post_valid_test_file_path`, test uploads a test to the directory. After test execution it can be deleted.
+- The race condition issue could be reproduced in test level by using threads, but I am not sure about to do it in the unit tests.
+
+
+-------------
+
+
 # DCM Technical Task
 
 This is a web application that provides a central place to run Python-based
